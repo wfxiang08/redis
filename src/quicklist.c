@@ -1227,6 +1227,9 @@ int quicklistIndex(const quicklist *quicklist, const long long idx,
     quicklistNode *n;
     unsigned long long accum = 0;
     unsigned long long index;
+
+    // idx >=0 总成立
+    // forward == 1
     int forward = idx < 0 ? 0 : 1; /* < 0 -> reverse, 0+ -> forward */
 
     initEntry(entry);
@@ -1236,6 +1239,8 @@ int quicklistIndex(const quicklist *quicklist, const long long idx,
         index = (-idx) - 1;
         n = quicklist->tail;
     } else {
+        // 从idx开始
+        // 结束的地方是head
         index = idx;
         n = quicklist->head;
     }
@@ -1244,12 +1249,14 @@ int quicklistIndex(const quicklist *quicklist, const long long idx,
         return 0;
 
     while (likely(n)) {
+        // 达到目标:
+        //     accum + n->count
         if ((accum + n->count) > index) {
             break;
         } else {
-            D("Skipping over (%p) %u at accum %lld", (void *)n, n->count,
-              accum);
+            D("Skipping over (%p) %u at accum %lld", (void *)n, n->count, accum);
             accum += n->count;
+            //
             n = forward ? n->next : n->prev;
         }
     }
